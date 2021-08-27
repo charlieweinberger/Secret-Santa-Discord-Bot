@@ -100,6 +100,7 @@ async def on_message(message):
     if message.content.startswith('suggestion') or message.content.startswith('Suggestion'):
 
         message_content = message.content.replace('suggestion', '')
+        message_content = message_content.replace('Suggestion', '')
         
         if len(message_content) > 1:
 
