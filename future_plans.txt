@@ -1,0 +1,123 @@
+Future Plans:
+
+- say "pick your english class"   | give them the option of english 1 through ap english lit (list below)
+- say "pick your english period"  | give them the option of period 1 through 6
+- say "pick your english teacher" | have them type their teacher's name (full name in the form of 'last, first')
+
+repeat for all other subjects.
+
+give them the option to
+- add multiple classes per subject
+- respond "other" and add their own class/period/teacher (so that I can look at their response and add the proper roles and channels)
+
+use the embeds in #roles in the discord server for the "pick your english class" step
+
+bdlow classes are specific to teacher & period.
+
+----------------------------------------------------------------------------------------------------------------------
+
+Until I can find more info about the academies & electives, dont include those
+
+Should Math 1 and Math 1H be in different channels? same for english
+
+Do I need an english or math "general" channel?
+
+find out if some classes have multiple periods (ap csp, ap gov, ethnic studies, statistics, ap physics 1/2/c, env science, spanish speakers 1/2, ChineseCinBus)
+
+----------------------------------------------------------------------------------------------------------------------
+
+['English 1', 'English 1 Honors', 'English 2', 'English 2 Honors', 'English 3', 'English 3 Honors', 'AP English Lang', 'AP English Lit', 'ERWC']
+['Math 1', 'Math 1 Honors', 'Math 2', 'Math 2 Honors', 'Math 3', 'Math 3 Honors', 'AP Calc AB', 'AP Calc BC', 'Statistics', 'AP Statistics', 'Math Academy']
+['Chemistry', 'Honors Chem', 'AP Chem']
+['Biology', 'Honors Bio', 'AP Bio']
+['Physics', 'AP Physics 1', 'AP Physics 2', 'AP Physics C']
+['Environmental Science', 'AP Environmental Science', 'AP CSP', 'Eurisko']
+['AP Human Geo', 'World History', 'Honors World History', 'AP Euro', 'US History', 'AP US History', 'AP Gov', 'Ethnic Studies']
+['Spanish 1', 'Spanish 2', 'Spanish 3', 'Spanish Speakers 1', 'Spanish Speakers 2', 'AP Spanish Lang']
+['French 1', 'French 2', 'French 3']
+['Mandarin 1', 'Mandarin 2', 'Mandarin 3', 'AP Chinese', 'ChineseCinBus']
+
+English:
+
+- English 1         - specific
+- English 1H        - specific
+- English 2         - specific
+- English 2H        - specific
+- English 3         - specific
+- English 3H        - specific
+- AP English Lang   - specific
+- AP English Lit    - specific
+- ERWC              - specific
+
+Math:
+
+- Math 1            - specific
+- Math 1H           - specific
+- Math 2            - specific
+- Math 2H           - specific
+- Math 3            - specific
+- Math 3H           - specific
+- Calculus          - AP Calc AB specific
+                    - AP Calc BC specific
+- Statistics        - Statistics specific
+                    - AP Statistics specific
+- Math Academy
+
+Chemistry:
+
+- Chemistry         - Chemistry specific
+                    - Honors chem specific
+                    - AP Chem Specific
+
+Biology:
+
+- Biology           - Biology specific
+                    - Honors Bio specific
+                    - AP Bio Specific
+
+Physics:
+
+- Physics           - specific
+- AP Physics 1      - specific
+- AP Physics 2      - specific
+- AP Physics C      - specific
+
+Science:
+
+- Env Science       - Env Science specific
+                    - AP Env Science specific
+- AP CSP            - specific
+- Eurisko
+
+Social Studies
+
+- AP Human Geo      - specific
+- World History     - World History specific
+                    - Honors World History specific
+- AP Euro           - specific
+- US History
+- AP Gov            - specific
+- Ethnic Studies    - specific
+
+Spanish:
+
+- Spanish 1         - specific
+- Spanish 2         - specific
+- Spanish 3         - specific
+- Spanish Speaker 1 - specific
+- Spanish Speaker 2 - specific
+- AP Spanish Lang   - specific
+
+French:
+
+- French 1          - specific
+- French 2          - specific
+- French 3          - specific
+
+Mandarin:
+
+- Mandarin 1        - specific
+- Mandarin 2        - specific
+- Mandarin 3        - specific
+- AP Chinese        - specific
+- ChineseCinBus     - specific
