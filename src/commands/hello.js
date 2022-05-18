@@ -7,7 +7,7 @@ const Hello = {
                 .setDescription('says hi!'),
     
     execute: async (interaction) => {
-        interaction.reply({
+        await interaction.reply({
             content: 'hi!'
         });
     }
