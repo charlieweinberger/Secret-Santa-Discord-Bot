@@ -13,7 +13,7 @@ const client = new Client({
 client.commands = new Collection();
 
 const participants = {};
-
+let order = [];
 let state = "";
 
 new SlashCommandBuilder()
@@ -48,7 +48,7 @@ client.on('interactionCreate', async (interaction) => {
 
         const dmComponents = new MessageActionRow().addComponents(
             new MessageButton()
-                .setCustomId(`assign`)
+                .setCustomId(`confirm assign`)
                 .setLabel('Assign')
                 .setStyle('PRIMARY')
         );
@@ -78,12 +78,35 @@ client.on('interactionCreate', async (interaction) => {
 
             state = "create name";
 
-            participants[user.discriminator] = {
+            participants[user.id] = {
+                'id': user.id,
+                'username': `${user.username}#${user.discriminator}`,
                 'name': '',
                 'wishlist': []
             };
 
         } else if (customId == 'review info') {
+
+            let wishlistString = "";
+            for (const item of participants[user.id]["wishlist"]) {
+                wishlistString += item + "\n";
+            }
+
+            const embed = new MessageEmbed()
+                .setTitle("Your Name & Wishlist")
+                .setDescription("Here is a list of everything you have added to your wishlist. To edit your name or wishlist, click the buttons below. You can edit your wishlist at any time up until you are assigned to another person.")
+                .addFields([
+                    {
+                        name: "Name",
+                        value: participants[user.id]["name"],
+                        inline: true
+                    },
+                    {
+                        name: "Wishlist",
+                        value: wishlistString,
+                        inline: true
+                    }
+            ]);
 
             const components = new MessageActionRow().addComponents(
                 new MessageButton()
@@ -100,29 +123,8 @@ client.on('interactionCreate', async (interaction) => {
                     .setStyle('PRIMARY')
             );
 
-            let wishlistString = "";
-            for (const item of participants[user.discriminator]["wishlist"]) {
-                wishlistString += item + "\n";
-            }
-
             await user.send({
-                embeds: [
-                    new MessageEmbed()
-                        .setTitle("Your Name & Wishlist")
-                        .setDescription("Here is a list of everything you have added to your wishlist. To edit your name or wishlist, click the buttons below. You can edit your wishlist at any time up until you are assigned to another person.")
-                        .addFields([
-                            {
-                                name: "Name",
-                                value: participants[user.discriminator]["name"],
-                                inline: true
-                            },
-                            {
-                                name: "Wishlist",
-                                value: wishlistString,
-                                inline: true
-                            }
-                        ])
-                ],
+                embeds: [embed],
                 components: [components]
             });
 
@@ -180,13 +182,81 @@ client.on('interactionCreate', async (interaction) => {
 
             state = "remove from wishlist";
 
-        } else if (customId == 'assign') {
+        } else if (customId == 'confirm assign') {
 
-            // work on assigning part
+            let nameListString = "";
+            let usernameListString = "";
+            for (const participant of Object.values(participants)) {
+                nameListString += `${participant['name']}\n`;
+                usernameListString += `${participant['username']}\n`
+            }
+
+            const embed = new MessageEmbed()
+            .setTitle("Assign players a partner")
+            .setDescription("You are about to assign each player a person to get a gift for. The current list of players is shown below. Do you want to start?")
+            .addFields([
+                {
+                    name: "Name",
+                    value: nameListString,
+                    inline: true
+                },
+                {
+                    name: "Username",
+                    value: usernameListString,
+                    inline: true
+                }
+            ]);
+
+            const components = new MessageActionRow().addComponents(
+                new MessageButton()
+                    .setCustomId('assign')
+                    .setLabel('Yes')
+                    .setStyle('PRIMARY')
+            );
 
             await user.send({
-                content: 'You just started assigning players to each other in a game of secret santa.'
+                embeds: [embed],
+                components: [components]
             });
+
+        } else if (customId == 'assign') {
+
+            order = Object.keys(participants);
+
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+
+            for (let i = 0; i < order.length; i++) {
+
+                client.users.fetch(order[i]).then(async (user) => {
+
+                    const j = i == 0 ? order.length - 1 : i - 1;
+                    const giftee = participants[order[j]];
+
+                    let wishlistString = "";
+                    for (const item of giftee["wishlist"]) {
+                        wishlistString += item + "\n";
+                    }
+
+                    const embed = new MessageEmbed()
+                        .setTitle("Secret Santa")
+                        .setDescription(`You have been assigned to get a gift for: ${giftee["name"]} (${giftee["username"]}).`)
+                        .addFields([
+                            {
+                                name: "Wishlist",
+                                value: wishlistString,
+                            }
+                        ]);
+
+                    await user.send({
+                        embeds: [embed]
+                    });
+
+                });
+
+            }
 
         }
 
@@ -196,10 +266,10 @@ client.on('interactionCreate', async (interaction) => {
 
 client.on('messageCreate', async (message) => {
     
-    if (message.author.bot) return;
-    
+    if (message.author.bot || message.channel.type != 'DM') return;
+
     const user = message.author;
-    const participant = participants[user.discriminator];
+    const participant = participants[user.id];
 
     if (state == "create name") {
 
@@ -309,16 +379,16 @@ Secret Santa
 
     - gives info about secret santa
     - DMs whoever started the game with a button to start the shuffle
-    - has a button to join the game
+    - has a button to join the game in the server
     
     - if you press the button, you get a DM that:
         1. asks for your name
         2. asks for what you want
-        3. gives you a button to edit your wish list
-
-Minor Things to do
+    
+    - when the person who started the game starts the shuffle, everyone gets a DM with the person they are getting a gift for and their wishlist
+    - communicate anonymously with each other
+    - able to edit wishlist after shuffle, bot sends updated wishlist to other person
 
     - redo embeds and components so that each embed and component is only defined once, globally (as opposed to multiple times locally)
-    - work on assigning part
 
 */
