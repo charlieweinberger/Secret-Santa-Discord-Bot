@@ -1,5 +1,5 @@
 import { Client, Collection, Intents, MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+// import { SlashCommandBuilder } from '@discordjs/builders';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,11 +17,20 @@ let order = [];
 let state = "";
 let assigned = false;
 
-new SlashCommandBuilder()
-    .setName("secret-santa")
-    .setDescription("Start a game of Secret Santa!");
+client.once("ready", () => {
 
-client.once("ready", () => console.log("Bot is ready!"));
+    console.log("Bot is ready!")
+
+    const guildID = "849914162216960021";
+    const guild = client.guilds.cache.get(guildID);
+    let commands = guild ? guild.commands : client.application?.commands;
+
+    commands?.create({
+        name: "secret-santa",
+        description: "Start a game of Secret Santa!"
+    })
+
+});
 
 client.on("interactionCreate", async (interaction) => {
 
@@ -33,7 +42,7 @@ client.on("interactionCreate", async (interaction) => {
     } else if (interaction.isButton()) {
 
         const { customId, user } = interaction;
-            
+
         await interaction.deferUpdate();
 
         if (customId == "join") {
@@ -85,6 +94,16 @@ client.on("interactionCreate", async (interaction) => {
 
             assigned = true;
 
+        } else if (customId == "chat with gifter") {
+
+            chatEmbed(user, "gifter");
+            state = "chat with gifter";
+
+        } else if (customId == "chat with giftee") {
+
+            chatEmbed(user, "giftee");
+            state = "chat with giftee";
+
         }
 
     }
@@ -127,6 +146,28 @@ client.on('messageCreate', async (message) => {
 
         participant['name'] = message.content;
         reviewInfoEmbed(user);
+
+    } else if (state == "chat with gifter") {
+
+        confirmChatSentEmbed(user, message.content, "gifter");
+
+        const i = order.indexOf(user.id);
+        const gifterParticipant = participants[order[i == order.length - 1 ? 0 : i + 1]];
+
+        client.users.fetch(gifterParticipant["id"]).then(async (gifter) => {
+            sendChatEmbed(gifter, message.content, "giftee");
+        });
+
+    } else if (state == "chat with giftee") {
+
+        confirmChatSentEmbed(user, message.content, "giftee");
+
+        const i = order.indexOf(user.id);
+        const gifteeParticipant = participants[order[i == 0 ? order.length - 1 : i - 1]];
+        
+        client.users.fetch(gifteeParticipant["id"]).then(async (giftee) => {
+            sendChatEmbed(giftee, message.content, "gifter");
+        });
 
     }
 
@@ -220,7 +261,7 @@ async function assignEmbed(user, giftee) {
 
     const embed = new MessageEmbed()
         .setTitle("Secret Santa")
-        .setDescription(`You have been assigned to get a gift for: ${giftee["name"]} (${giftee["username"]}). Here are their preferences. To edit your preferences or chat anonymously with the other person, click the buttons below.`)
+        .setDescription(`You have been assigned to get a gift for: ${giftee["name"]} (${giftee["username"]}). Here are their preferences. To edit your preferences, chat anonymously with your gifter, or chat with this person, click the buttons below.`)
         .addFields([
             {
                 name: "Preferences",
@@ -234,8 +275,12 @@ async function assignEmbed(user, giftee) {
             .setLabel("Edit Preferences")
             .setStyle("PRIMARY"),
         new MessageButton()
-            .setCustomId("chat anonymously")
-            .setLabel("Chat Anonymously")
+            .setCustomId("chat with gifter")
+            .setLabel("Chat With Gifter")
+            .setStyle("PRIMARY"),
+        new MessageButton()
+            .setCustomId("chat with giftee")
+            .setLabel("Chat With Giftee")
             .setStyle("PRIMARY")
     );
 
@@ -315,6 +360,66 @@ async function editPreferencesAfterAssignEmbed(user) {
 
 }
 
+async function chatEmbed(user, person) {
+
+    const embed = new MessageEmbed()
+        .setTitle("Secret Santa")
+        .setDescription(`You can chat with your ${person} here. They will receive whatever you type below.`);
+
+    await user.send({
+        embeds: [embed]
+    });
+
+}
+
+async function confirmChatSentEmbed(user, message, person) {
+
+    const embed = new MessageEmbed()
+        .setTitle("Secret Santa")
+        .setDescription(`Here is the message your ${person} will receive.`)
+        .addFields([
+            {
+                name: "Message",
+                value: message,
+            }
+        ]);
+
+    await user.send({
+        embeds: [embed]
+    });
+
+}
+
+async function sendChatEmbed(user, message, person) {
+
+    const embed = new MessageEmbed()
+        .setTitle("Secret Santa")
+        .setDescription(`Your ${person} has sent you a message. Click the button below to respond.`)
+        .addFields([
+            {
+                name: "Message",
+                value: message
+            }
+        ]);
+
+    let personLabel;
+    if (person == "gifter") personLabel = "Gifter";
+    if (person == "giftee") personLabel = "Giftee";
+
+    const components = new MessageActionRow().addComponents(
+        new MessageButton()
+            .setCustomId(`chat with ${person}`)
+            .setLabel(`Chat With ${personLabel}`)
+            .setStyle("PRIMARY")
+    );
+
+    await user.send({
+        embeds: [embed],
+        components: [components]
+    });
+
+}
+
 async function updatePreferencesForGifteeEmbed(user, giftee) {
 
     const embed = new MessageEmbed()
@@ -377,7 +482,6 @@ async function reviewInfoEmbed(user) {
     - if you press the button, you get a DM that asks for your name & preference
     - when the person who started the game starts the shuffle, everyone gets a DM with the person they are getting a gift for and their preferences
     - able to edit preferences after shuffle, bot sends updated preferences to other person
-    
     - communicate anonymously with each other
 
 */
